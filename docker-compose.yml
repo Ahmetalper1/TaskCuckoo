@@ -1,0 +1,50 @@
+version: "2"
+
+services:
+  cuckoo:
+    privileged: true
+    image: cuckoo-docker:2.0.7
+    build:
+      context: ./
+      dockerfile: src/Dockerfile.devel
+    ports:
+      - "8888:8000"
+      - "2042:2042"
+    expose:
+      - "8000"
+    links:
+      - mongo
+      - postgres
+    networks:
+     - cuckoo
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    extra_hosts:
+      - "libvirt.local:172.30.201.1"
+
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    networks:
+     - cuckoo
+    restart: always
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cuckoo
+    networks:
+     - cuckoo
+    restart: always
+
+networks:
+  cuckoo:
+    driver: bridge
+
+
+
